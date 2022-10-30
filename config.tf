@@ -6,7 +6,6 @@ terraform {
     }
   }
 }
-
 variable "image_id" {
   default = "ami-0f540e9f488cfa27d"
 }
@@ -44,8 +43,6 @@ resource "aws_instance" "build_instance" {
   tags = {
     Name = "AppBuilder"
   }
-
-  # subnet_id = "${var.subnet_id}"
   user_data = <<EOF
 #!/bin/bash
 sudo apt update && sudo apt install -y openjdk-8-jdk maven awscli
