@@ -75,9 +75,9 @@ resource "aws_instance" "build_instance" {
   # key_name = "${aws_key_pair.amazon.key_name}"
   vpc_security_group_ids = ["${aws_security_group.allow_app_traffic.id}"]
 
-  tags = {
-    Name = AppBuilder
-  }
+  # tags = {
+  #   Name = AppBuilder
+  # }
 
   # subnet_id = "${var.subnet_id}"
   user_data = <<EOF
@@ -99,9 +99,9 @@ resource "aws_instance" "prod_instance" {
   # key_name = "${aws_key_pair.amazon.key_name}"
   vpc_security_group_ids = ["${aws_security_group.allow_app_traffic.id}"]
 
-  tags = {
-    Name = WebServer
-  }
+  # tags = {
+  #   Name = WebServer
+  # }
 
   # subnet_id = "${var.subnet_id}"
   user_data = <<EOF
