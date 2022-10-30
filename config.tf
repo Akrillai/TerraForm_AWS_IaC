@@ -7,6 +7,17 @@ terraform {
   }
 }
 
+
+
+variable "access_key" {
+   default = "<PUT IN YOUR AWS ACCESS KEY or use 'export TF_VAR_access_key='>"
+}
+
+variable "secret_key" {
+   default = "<PUT IN YOUR AWS SECRET KEY or use 'export TF_VAR_secret_key='>"
+}
+
+
 provider "aws" {
 
   access_key = var.access_key
