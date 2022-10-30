@@ -8,6 +8,9 @@ terraform {
 }
 
 provider "aws" {
+
+  access_key = var.access_key
+  secret_key = var.secret_key
   region = "eu-west-2"
 }
 
@@ -60,10 +63,21 @@ resource "aws_instance" "build_instance" {
   instance_type = "t2.micro"
   # key_name = "${aws_key_pair.amazon.key_name}"
   vpc_security_group_ids = ["${aws_security_group.allow_app_traffic.id}"]
+
+  tags = {
+    Name = AppBuilder
+  }
+
   # subnet_id = "${var.subnet_id}"
   user_data = <<EOF
 #!/bin/bash
-pwd
+sudo apt update && sudo apt install -y openjdk-8-jdk maven awscli
+git clone https://github.com/boxfuse/boxfuse-sample-java-war-hello.git
+cd boxfuse-sample-java-war-hello && mvn package
+export AWS_ACCESS_KEY_ID="${access_key}"
+export AWS_SECRET_ACCESS_KEY="${secret_key}"
+export AWS_DEFAULT_REGION="${region}"
+aws s3 cp target/hello-1.0.war s3://mybucket15.test5.com
 EOF
   
 }
@@ -73,28 +87,21 @@ resource "aws_instance" "prod_instance" {
   instance_type = "t2.micro"
   # key_name = "${aws_key_pair.amazon.key_name}"
   vpc_security_group_ids = ["${aws_security_group.allow_app_traffic.id}"]
+
+  tags = {
+    Name = WebServer
+  }
+
   # subnet_id = "${var.subnet_id}"
   user_data = <<EOF
 #!/bin/bash
-pwd
+sudo apt update && sudo apt install -y openjdk-8-jdk tomcat8 awscli
+export AWS_ACCESS_KEY_ID="${access_key}"
+export AWS_SECRET_ACCESS_KEY="${secret_key}"
+export AWS_DEFAULT_REGION="${region}"
+aws s3 cp s3://mybucket15.test5.com/hello-1.0.war /tmp/hello-1.0.war
+sudo mv /tmp/hello-1.0.war /var/lib/tomcat8/webapps/hello-1.0.war
+sudo systemctl restart tomcat8
 EOF
-  
+
 }
-
-
-# sudo apt update && sudo apt install -y openjdk-8-jdk maven awscli
-# git clone https://github.com/boxfuse/boxfuse-sample-java-war-hello.git
-# cd boxfuse-sample-java-war-hello && mvn package
-# export AWS_ACCESS_KEY_ID=<...placeholder...>
-# export AWS_SECRET_ACCESS_KEY=<...placeholder...>
-# export AWS_DEFAULT_REGION=eu-west-2
-# aws s3 cp target/hello-1.0.war s3://mybucket15.test5.com
-
-
-# sudo apt update && sudo apt install -y openjdk-8-jdk tomcat8 awscli
-# export AWS_ACCESS_KEY_ID=<...placeholder...>
-# export AWS_SECRET_ACCESS_KEY=<...placeholder...>
-# export AWS_DEFAULT_REGION=eu-west-2
-# aws s3 cp s3://mybucket15.test5.com/hello-1.0.war /tmp/hello-1.0.war
-# sudo mv /tmp/hello-1.0.war /var/lib/tomcat8/webapps/hello-1.0.war
-# sudo systemctl restart tomcat8
